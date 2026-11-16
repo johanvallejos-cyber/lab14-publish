@@ -1,0 +1,70 @@
+name: Build and Deploy .NET Application
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore lab11-VallejosJohan.sln
+
+      - name: Build application
+        run: dotnet build lab11-VallejosJohan.sln --configuration Release --no-restore
+
+      - name: Publish application
+        run: dotnet publish lab11-VallejosJohan/lab11-VallejosJohan.csproj --configuration Release --no-build --output ./published
+
+      - name: Upload published application
+        uses: actions/upload-artifact@v4
+        with:
+          name: ticket-api
+          path: ./published
+          if-no-files-found: error
+
+      - name: Check SSH deployment configuration
+        id: deploy-config
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PATH: ${{ secrets.SERVER_PATH }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SERVER_KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
+        run: |
+          if [ -n "$SERVER_HOST" ] && [ -n "$SERVER_USER" ] && [ -n "$SERVER_PATH" ] && [ -n "$SERVER_SSH_KEY" ] && [ -n "$SERVER_KNOWN_HOSTS" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "SSH deployment skipped; configure all SERVER_* repository secrets to enable it."
+          fi
+
+      - name: Deploy to server over SSH
+        if: steps.deploy-config.outputs.configured == 'true'
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PATH: ${{ secrets.SERVER_PATH }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SERVER_KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SERVER_SSH_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$SERVER_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/deploy_key ~/.ssh/known_hosts
+          scp -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -r ./published/. "$SERVER_USER@$SERVER_HOST:$SERVER_PATH/"

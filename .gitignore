@@ -1,0 +1,23 @@
+# Build output
+**/bin/
+**/obj/
+publish/
+
+# Generated Excel reports and examples
+/lab11-VallejosJohan/archivo.xlsx
+/lab11-VallejosJohan/archivo_con_estilos.xlsx
+/lab11-VallejosJohan/reporte_respuestas.xlsx
+/lab11-VallejosJohan/reporte_tickets.xlsx
+/lab11-VallejosJohan/tabla.xlsx
+
+# IDE files
+.idea/
+.vs/
+*.user
+*.suo
+
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+appsettings.Local.json

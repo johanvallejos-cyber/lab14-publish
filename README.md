@@ -11,3 +11,7 @@ Para activar el paso de copia al servidor, configura los secretos `SERVER_HOST`,
 ## Despliegue en Render
 
 En Render crea un Web Service para este repositorio, selecciona la rama `main` y el runtime Docker. El `Dockerfile` está en la raíz. En Environment agrega `ConnectionStrings__DefaultConnection` con una cadena válida hacia una base de datos MySQL accesible desde Render. La API requiere esa cadena para iniciar; guarda la contraseña únicamente en Render, no en el repositorio.
+
+## Base de datos MySQL
+
+`TuApp.Infrastructure/Context/TicketeraContext.cs` contiene el mapeo generado para las tablas existentes. Para crear el esquema y cargar los datos de demostración, ejecuta `sistema_tickets.sql` una vez en una instancia MySQL 8. En Render puedes desplegar una instancia MySQL privada y con disco persistente; después ejecuta el script desde una herramienta que pueda conectarse a esa instancia. Configura la API con `ConnectionStrings__DefaultConnection` en este formato: `Server=<host-interno>;Port=3306;Database=sistema_tickets;User=<usuario>;Password=<contraseña>;`. El host `localhost` solo sirve cuando MySQL y la API se ejecutan en la misma máquina.

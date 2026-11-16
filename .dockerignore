@@ -1,0 +1,17 @@
+.git
+.github
+.idea
+.vs
+**/bin
+**/obj
+publish
+published
+Dockerfile
+.dockerignore
+**/*.user
+**/*.suo
+lab11-VallejosJohan/archivo.xlsx
+lab11-VallejosJohan/archivo_con_estilos.xlsx
+lab11-VallejosJohan/reporte_respuestas.xlsx
+lab11-VallejosJohan/reporte_tickets.xlsx
+lab11-VallejosJohan/tabla.xlsx
